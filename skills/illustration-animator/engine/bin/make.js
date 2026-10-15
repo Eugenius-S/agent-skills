@@ -1,10 +1,10 @@
-// usage: node engine/bin/make.js <scene.json> [--out <dir>] [--lottie-only]   (limit: ANIMATOR_MAKE_TIMEOUT_MS, default 10 min)
+// usage: node engine/bin/make.js <scene.json> [--out <dir>] [--lottie-only] [--timeout <s>]   (default limit 600 s)
 // scene → Lottie → frame-0 check → script checks → frames → GIF/MP4/MOV, plus <name>.status.json
 const fs = require('fs');
 const path = require('path');
 const { loadEnv } = require('../src/env');
 const { compileScene } = require('../src/scene/compile');
-const { compareFrame0, renderFrames } = require('../src/render/frames');
+const { compareFrame0, renderFrames, killBrowsers } = require('../src/render/frames');
 const { exportAll, formatsFor, hevcHasAlpha } = require('../src/render/export');
 const { lint } = require('../src/check/lint');
 const { sourceHash } = require('../src/scene/source-hash');
@@ -39,10 +39,11 @@ try {
 }
 
 // a run that hangs (Chrome, ffmpeg) ends as an error status instead of waiting forever; same limit as batch.js
-const TIMEOUT = Number(process.env.ANIMATOR_MAKE_TIMEOUT_MS) || 10 * 60 * 1000;
+const TIMEOUT = (Number(opt('--timeout')) || 600) * 1000;
 setTimeout(() => {
-  status({ state: 'error', error: `did not finish within ${Math.round(TIMEOUT / 1000)} s` });
+  status({ state: 'error', error: `did not finish within ${TIMEOUT / 1000} s` });
   console.error('timeout', name);
+  killBrowsers();
   process.exit(1);
 }, TIMEOUT).unref();
 

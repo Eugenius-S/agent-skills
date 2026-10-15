@@ -6,7 +6,7 @@ Owner's rules (2026-10-07):
 - Time limits are hard: scenario 3 minutes, animation 7 minutes, judge 3 minutes, fixes after the judge 4 minutes (see common.md). Don't dig in, don't compare frame by frame.
 - Affordance: a wheel rolls, a pen writes, a person in a walking pose walks.
 - Output is only Lottie JSON and MP4.
-- Bend arms at the joints (`bones.joints`, `bend`); legs in walking may be rigid pieces with masks (owner 2026-10-08: "joints don't have to bend").
+- Bend arms at the joints (`bones.joints`, `bend`); legs in walking may be rigid pieces with masks ("joints don't have to bend").
 - Walking references are the hiker and the skeleton; for masks and cutting off limbs — the hiker: `examples/rough-sketch/scenes/` (common.md, "Walking and overlaps").
 
 ## Lessons

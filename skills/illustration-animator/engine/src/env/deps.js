@@ -3,10 +3,10 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const { createRequire } = require('module');
 
-const HOME = process.env.ANIMATOR_HOME || path.join(os.homedir(), '.animator');
+const HOME = path.join(os.homedir(), '.animator');
 const DEPS = path.join(HOME, 'deps');
 const PIN = path.join(__dirname, '..', '..', 'deps');
 const pinned = () => require(path.join(PIN, 'package.json')).dependencies;
@@ -19,7 +19,13 @@ const missingDeps = () => Object.entries(pinned()).filter(([n, v]) => {
 function installDeps() {
   fs.mkdirSync(DEPS, { recursive: true });
   for (const f of ['package.json', 'package-lock.json']) fs.copyFileSync(path.join(PIN, f), path.join(DEPS, f));
-  execSync(`npm ci --prefix "${DEPS}" --no-audit --no-fund --ignore-scripts`, { stdio: 'inherit' });
+  const args = ['ci', '--prefix', DEPS, '--no-audit', '--no-fund', '--ignore-scripts'];
+  // npm's own script next to this node, run by node with an argument list: no shell, no quoting of the path
+  const bin = path.dirname(process.execPath);
+  const cli = [path.join(bin, 'node_modules', 'npm', 'bin', 'npm-cli.js'), path.join(bin, '..', 'lib', 'node_modules', 'npm', 'bin', 'npm-cli.js')].find((f) => fs.existsSync(f));
+  if (cli) execFileSync(process.execPath, [cli, ...args], { stdio: 'inherit' });
+  else if (process.platform === 'win32') execFileSync('npm.cmd', args.map((a) => `"${a}"`), { stdio: 'inherit', shell: true });
+  else execFileSync('npm', args, { stdio: 'inherit' });
 }
 
 const local = () => createRequire(path.join(DEPS, 'index.js'));

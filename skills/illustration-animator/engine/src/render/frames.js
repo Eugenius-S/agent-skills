@@ -2,11 +2,36 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const { req, resolve } = require('../env/deps');
+
+// Chrome processes still open: a run that times out kills them before it exits (on Windows a dead parent leaves them)
+const open = new Set();
+function killBrowsers() {
+  for (const p of open) {
+    if (!p || p.exitCode !== null) continue;
+    if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(p.pid), '/T', '/F'], { stdio: 'ignore' });
+    else p.kill('SIGKILL');
+  }
+  open.clear();
+}
+
+// why Chrome may not start on Linux, in words the user can act on
+const LINUX_HINT = 'On Linux Chrome may be blocked: Ubuntu 23.10+ restricts its sandbox with AppArmor, Chrome refuses to run as root (Docker), a snap Chromium cannot read files outside the home folder. Run as a regular user with Google Chrome or Chrome for Testing (setup downloads it when none is installed); in a container use a non-root user.';
+
+async function launch(puppeteer, env) {
+  try {
+    return await puppeteer.launch({ executablePath: env.chrome, headless: true, args: ['--force-color-profile=srgb'] });
+  } catch (e) {
+    throw new Error(`Chrome did not start (${env.chrome}): ${e.message.split('\n')[0]}${process.platform === 'linux' ? `. ${LINUX_HINT}` : ''}`);
+  }
+}
 
 async function withPage(env, [W, H], fn) {
   const puppeteer = req('puppeteer-core');
-  const browser = await puppeteer.launch({ executablePath: env.chrome, headless: true, args: ['--force-color-profile=srgb'] });
+  const browser = await launch(puppeteer, env);
+  const proc = browser.process();
+  open.add(proc);
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
@@ -15,6 +40,7 @@ async function withPage(env, [W, H], fn) {
     return await fn(page);
   } finally {
     await browser.close();
+    open.delete(proc);
   }
 }
 
@@ -92,4 +118,4 @@ async function compareFrame0(svgFile, lottie, env, [W, H], { frame = 0, diffOut,
   return { meanDiff: res.meanDiff, badPixelsPct: res.badPixelsPct, bad: res.bad, badPts: res.pts, leakPts: res.leak, pass: res.badPixelsPct < 0.5 };
 }
 
-module.exports = { renderFrames, compareFrame0, withPage, load };
+module.exports = { renderFrames, compareFrame0, withPage, load, killBrowsers };

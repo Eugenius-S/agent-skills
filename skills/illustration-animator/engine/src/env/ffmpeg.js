@@ -1,4 +1,5 @@
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
@@ -20,16 +21,17 @@ function missingEncoders(platform, enc) {
   return miss;
 }
 
-function ffmpegCandidates(platform, env) {
+// given: a path the user named (setup --ffmpeg); then standard install places; the engine reads no environment variables
+function ffmpegCandidates(platform, home, given) {
   const c = [];
-  if (env.ANIMATOR_FFMPEG) c.push(env.ANIMATOR_FFMPEG);
-  if (platform === 'win32' && env.LOCALAPPDATA) c.push(path.win32.join(env.LOCALAPPDATA, 'Microsoft', 'WinGet', 'Links', 'ffmpeg.exe'));
+  if (given) c.push(given);
+  if (platform === 'win32') c.push(path.win32.join(home, 'AppData', 'Local', 'Microsoft', 'WinGet', 'Links', 'ffmpeg.exe'));
   if (platform === 'darwin') c.push('/opt/homebrew/bin/ffmpeg', '/usr/local/bin/ffmpeg');
   return c;
 }
 
-function findFfmpeg({ platform = process.platform, env = process.env, exists = fs.existsSync } = {}) {
-  const hit = ffmpegCandidates(platform, env).find((p) => exists(p));
+function findFfmpeg({ platform = process.platform, home = os.homedir(), given = null, exists = fs.existsSync } = {}) {
+  const hit = ffmpegCandidates(platform, home, given).find((p) => exists(p));
   if (hit) return hit;
   const r = spawnSync(platform === 'win32' ? 'where' : 'which', ['ffmpeg'], { encoding: 'utf8' });
   return r.status === 0 ? r.stdout.split(/\r?\n/)[0].trim() : null;
@@ -38,9 +40,11 @@ function findFfmpeg({ platform = process.platform, env = process.env, exists = f
 const readEncoders = (ffmpeg) =>
   parseEncoders(spawnSync(ffmpeg, ['-hide_banner', '-encoders'], { encoding: 'utf8' }).stdout || '');
 
+// shown to the user, never run by setup: winget asks them to accept the licences itself
 const INSTALL = {
-  win32: 'winget install --id Gyan.FFmpeg -e --accept-source-agreements --accept-package-agreements',
+  win32: 'winget install --id Gyan.FFmpeg -e',
   darwin: 'brew install ffmpeg',
+  linux: 'sudo apt install ffmpeg',
 };
 
 module.exports = { parseEncoders, hevcEncoder, missingEncoders, findFfmpeg, readEncoders, INSTALL };

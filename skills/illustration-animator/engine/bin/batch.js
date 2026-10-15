@@ -1,4 +1,4 @@
-// usage: node engine/bin/batch.js <style dir> [--force] [--limit N] [--jobs N]
+// usage: node engine/bin/batch.js <style dir> [--force] [--limit N] [--jobs N] [--timeout <s> per scene, default 600]
 // make every scene in <style dir>/scenes that is not done yet (or whose scene/SVG changed since it was made)
 const fs = require('fs');
 const path = require('path');
@@ -8,14 +8,15 @@ const { sourceHash } = require('../src/scene/source-hash');
 const args = process.argv.slice(2);
 const dir = args[0] && path.resolve(args[0]);
 if (!dir || !fs.existsSync(path.join(dir, 'scenes'))) {
-  console.error('Usage: node engine/bin/batch.js <style folder> [--force] [--limit N] [--jobs N] (scenes/ folder required)');
+  console.error('Usage: node engine/bin/batch.js <style folder> [--force] [--limit N] [--jobs N] [--timeout <s>] (scenes/ folder required)');
   process.exit(1);
 }
 const num = (k, d) => { const i = args.indexOf(k); return i >= 0 ? Math.max(1, parseInt(args[i + 1], 10) || d) : d; };
 const force = args.includes('--force');
 const limit = num('--limit', Infinity);
 const jobs = num('--jobs', 1);
-const TIMEOUT = Number(process.env.ANIMATOR_MAKE_TIMEOUT_MS) || 10 * 60 * 1000;
+const TIMEOUT_S = (() => { const i = args.indexOf('--timeout'); return (i >= 0 && Number(args[i + 1])) || 600; })();
+const TIMEOUT = TIMEOUT_S * 1000;
 const scenes = path.join(dir, 'scenes');
 const out = path.join(dir, 'out');
 const MAKE = path.join(__dirname, 'make.js');
@@ -50,16 +51,17 @@ counts.remaining += todo.length - batch.length;
 
 function makeOne(job) {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [MAKE, job.file, '--out', out], { stdio: ['ignore', 'ignore', 'pipe'] });
+    const child = spawn(process.execPath, [MAKE, job.file, '--out', out, '--timeout', String(TIMEOUT_S)], { stdio: ['ignore', 'ignore', 'pipe'] });
     let err = '';
     let timedOut = false;
     child.stderr.on('data', (d) => { err += d; });
-    const timer = setTimeout(() => { timedOut = true; child.kill(); }, TIMEOUT);
+    // make stops itself at the same limit and closes its Chrome; the kill is the fallback a little later
+    const timer = setTimeout(() => { timedOut = true; child.kill(); }, TIMEOUT + 15000);
     child.on('close', (code) => {
       clearTimeout(timer);
       if (timedOut) {
         fs.mkdirSync(out, { recursive: true });
-        const error = 'make did not finish within 10 min';
+        const error = `make did not finish within ${TIMEOUT_S} s`;
         fs.writeFileSync(path.join(out, `${job.name}.status.json`), JSON.stringify({ name: job.name, at: new Date().toISOString(), ...(job.hash ? { source: job.hash } : {}), state: 'error', error }, null, 2));
         resolve({ state: 'error', note: error });
         return;

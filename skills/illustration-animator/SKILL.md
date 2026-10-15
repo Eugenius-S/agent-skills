@@ -11,7 +11,7 @@ The motion rules, style rules and reference scenes in this skill were trained on
 
 ## Paths
 
-`${CLAUDE_SKILL_DIR}` is the folder that holds this SKILL.md. Clients that do not fill the variable in: replace it with that folder's absolute path. The engine runs from there: convert the user's style folder to an absolute path first, then `cd "${CLAUDE_SKILL_DIR}"` and run every `node engine/bin/…` command from it. The step documents are in `references/`; the paths they cite (`styles/…`, `scene-format.md`, `judge.md`) are relative to `references/`.
+`${CLAUDE_SKILL_DIR}` is the folder that holds this SKILL.md. Clients that do not fill the variable in: replace it with that folder's absolute path, here and in every document of the skill. Every engine command names the script by that path, `node "${CLAUDE_SKILL_DIR}/engine/bin/<tool>.js" …`, so it works from any working folder; give it the user's style folder as an absolute path. A subagent gets the absolute path of this folder in its prompt, in place of `${CLAUDE_SKILL_DIR}`. The step documents are in `references/`; the paths they cite (`styles/…`, `scene-format.md`, `judge.md`) are relative to `references/`.
 
 ## Setup
 
@@ -21,7 +21,12 @@ Needs [Node.js](https://nodejs.org) 22.12 or newer. Once per machine:
 node "${CLAUDE_SKILL_DIR}/engine/bin/setup.js"
 ```
 
-When something is missing it changes nothing and prints a plan: the pinned npm dependencies (`npm ci` from `engine/deps/package-lock.json`, install scripts off) into `~/.animator/deps`, Chrome for Testing (a pinned build) into `~/.animator/chrome` if no Chrome, Chromium or Edge is installed, ffmpeg with Homebrew on macOS or winget on Windows if there is none with the needed encoders. Show the plan to the user and, only after they agree, run the same command with `--yes`. When nothing is missing it prints "Environment ready". It touches nothing outside `~/.animator/` except the ffmpeg install, and never the agents' skill folders. Safe to re-run.
+It installs nothing by itself:
+- exit code 0, "Environment ready" — nothing is missing;
+- exit code 2 — it changed nothing and printed a plan: the pinned npm dependencies (`npm ci` from `engine/deps/package-lock.json`, install scripts off) into `~/.animator/deps`, Chrome for Testing (a pinned build, checked by SHA-256) into `~/.animator/chrome` if no Chrome, Chromium or Edge is installed. Show the plan to the user and, only after they agree, run the same command with `--yes`;
+- exit code 3 — there is no ffmpeg with the needed encoders. Setup never installs it: give the user the command it printed (`brew install ffmpeg`, `winget install --id Gyan.FFmpeg -e`, `sudo apt install ffmpeg`) to run themselves, then run setup again. An ffmpeg in a non-standard place: `--ffmpeg <path>`.
+
+Setup writes only into `~/.animator/`, never into the agents' skill folders. The engine then writes scenes, animations, rules and samples into the user's style folder and rendered frames into the system temporary folder. Safe to re-run.
 
 ## Input and output
 

@@ -2,6 +2,9 @@
 // or the vertices of contour j of element N with their numbers, for a cut), in 1200×1200 space.
 const { parseSvg, pathsBBox } = require('../src/svg/parse');
 
+// ids and group names come from the SVG and land in the agent's context: plain name characters only, short
+const clean = (s, n = 40) => String(s).replace(/[^\w.:#-]/g, '?').slice(0, n);
+
 const args = process.argv.slice(2);
 if (!args[0]) {
   console.error('Usage: node engine/bin/els.js <file.svg> [--sub N]');
@@ -22,7 +25,7 @@ if (pts >= 0) {
 } else {
   for (const e of els) {
     const c = (e.grad ? 'grad ' : '') + e.color.map((v) => Math.round(v * 255)).join(',');
-    console.log(e.i, e.tag, c, e.bbox.map(Math.round).join(' '), e.groups.join('/'), e.id || '', e.paths.length > 1 ? `paths: ${e.paths.length}` : '');
+    console.log(e.i, e.tag, c, e.bbox.map(Math.round).join(' '), e.groups.map((g) => clean(g)).join('/'), e.id ? clean(e.id) : '', e.paths.length > 1 ? `paths: ${e.paths.length}` : '');
   }
-  for (const w of warnings) console.log('!', w);
+  for (const w of warnings) console.log('!', w.replace(/[^\w\s.:#(),/-]/g, '?').slice(0, 200));
 }

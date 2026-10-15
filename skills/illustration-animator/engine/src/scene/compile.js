@@ -321,6 +321,15 @@ function compileScene(file, opts = {}) {
       if (!(Number.isInteger(b) && b >= 0 && b < parts[p.attach.part].bones.joints.length - 1)) throw new Error(`${p.name}: ${p.attach.part} has no bone ${b}`);
     }
   }
+  // a parent / attach chain that loops would never end below (pinned chains, joints): refused here
+  for (const p of Object.values(parts)) {
+    const seen = [p.name];
+    for (let q = p; q.attach || q.parent;) {
+      q = parts[q.attach ? q.attach.part : q.parent];
+      if (seen.includes(q.name)) throw new Error(`Parent cycle: ${[...seen, q.name].join(' → ')}`);
+      seen.push(q.name);
+    }
+  }
 
   if (!scene.tracks.some((tr) => tr.role === 'action')) throw new Error('No story: the scene has no action (role: action)');
   const segs = {};

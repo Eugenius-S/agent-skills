@@ -4,9 +4,10 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-function chromeCandidates(platform = process.platform, env = process.env) {
+// Standard install places only; the engine reads no environment variables (home: the user's home folder).
+function chromeCandidates(platform = process.platform, home = os.homedir()) {
   if (platform === 'win32') {
-    const roots = [env.PROGRAMFILES, env['PROGRAMFILES(X86)'], env.LOCALAPPDATA].filter(Boolean);
+    const roots = ['C:\\Program Files', 'C:\\Program Files (x86)', path.win32.join(home, 'AppData', 'Local')];
     return roots.flatMap((r) => [
       path.win32.join(r, 'Google', 'Chrome', 'Application', 'chrome.exe'),
       path.win32.join(r, 'Chromium', 'Application', 'chrome.exe'),
@@ -14,7 +15,7 @@ function chromeCandidates(platform = process.platform, env = process.env) {
     ]);
   }
   if (platform === 'darwin') {
-    const dirs = ['/Applications', path.posix.join(env.HOME || os.homedir(), 'Applications')];
+    const dirs = ['/Applications', path.posix.join(home, 'Applications')];
     return dirs.flatMap((d) => [
       `${d}/Google Chrome.app/Contents/MacOS/Google Chrome`,
       `${d}/Chromium.app/Contents/MacOS/Chromium`,
@@ -24,8 +25,8 @@ function chromeCandidates(platform = process.platform, env = process.env) {
   return ['/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser'];
 }
 
-function findChrome({ platform = process.platform, env = process.env, exists = fs.existsSync } = {}) {
-  return chromeCandidates(platform, env).find((p) => exists(p)) || null;
+function findChrome({ platform = process.platform, home = os.homedir(), exists = fs.existsSync } = {}) {
+  return chromeCandidates(platform, home).find((p) => exists(p)) || null;
 }
 
 const CHROME_BUILD = '155.0.8059.79'; // PUPPETEER_REVISIONS.chrome of puppeteer-core 25.14.0

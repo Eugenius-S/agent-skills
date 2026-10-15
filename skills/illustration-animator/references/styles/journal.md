@@ -11,4 +11,4 @@ Characters are drawn as one outline together with objects (an arm with the torso
 
 ## User bans
 
-- Don't bend a whole character fused into one contour with bones without a cut (robotic movements, the contour breaks) → cut the fused parts (`cuts`) and bend the cut-off part with a pinned seam (`pin`). 2026-10-05, all Journal scenes; 2026-10-06 the ban "don't animate Journal" lifted by the owner's decision: cutting is built into the engine.
+- Don't bend a whole character fused into one contour with bones without a cut (robotic movements, the contour breaks) → cut the fused parts (`cuts`) and bend the cut-off part with a pinned seam (`pin`). 2026-10-05, all Journal scenes; 2026-10-06 the ban "don't animate Journal" lifted by the user's decision: cutting is built into the engine.

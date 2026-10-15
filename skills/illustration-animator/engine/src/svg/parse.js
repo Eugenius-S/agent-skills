@@ -35,7 +35,8 @@ function parseTransform(str) {
 
 const attrs = (s) => {
   const o = {};
-  s.replace(/([\w:-]+)\s*=\s*"([^"]*)"/g, (_, k, v) => (o[k] = v));
+  // a name starts after whitespace or at the start: a long run of name characters is not rescanned from every position
+  s.replace(/(?<![\w:-])([\w:-]+)\s*=\s*"([^"]*)"/g, (_, k, v) => (o[k] = v));
   return o;
 };
 
@@ -160,12 +161,22 @@ function parseSvgString(src, { size = 1200 } = {}) {
   const stack = [{ m: I, fill: '#000', op: 1, ids: [], rule: 'nonzero' }];
   const els = [], grads = {}, css = {}, warnings = [];
   let srcSize = null;
-  for (const [, body] of src.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g))
-    for (const [, sels, decl] of body.matchAll(/([^{}]+)\{([^}]*)\}/g))
+  // CSS rules split by braces, not by a backtracking regex: linear in the size of the file
+  for (let i = src.indexOf('<style'); i >= 0; i = src.indexOf('<style', i)) {
+    const open = src.indexOf('>', i), close = src.indexOf('</style>', open);
+    if (open < 0 || close < 0) break;
+    const body = src.slice(open + 1, close).replace('<![CDATA[', '').replace(']]>', '');
+    i = close + 8;
+    for (const rule of body.split('}')) {
+      const at = rule.indexOf('{');
+      if (at < 0) continue;
+      const sels = rule.slice(0, at), decl = rule.slice(at + 1);
       for (const sel of sels.split(',')) {
         const k = sel.trim().replace(/^\./, '');
         css[k] = { ...css[k], ...styleObj(decl) };
       }
+    }
+  }
   const tagAttrs = (rest) => {
     const a = attrs(rest);
     for (const c of (a.class || '').split(/\s+/).filter(Boolean)) Object.assign(a, css[c]);
@@ -179,7 +190,7 @@ function parseSvgString(src, { size = 1200 } = {}) {
   };
   // First pass: gradients can be defined after their use (Figma puts <defs> at the end).
   {
-    const gre = /<(\/?)(\w+)\b([^>]*?)(\/?)>/g;
+    const gre = /<(\/?)(\w+)\b([^<>]*?)(\/?)>/g;
     let g, cur = null;
     while ((g = gre.exec(src))) {
       const [, close, tag, rest, self] = g;
@@ -195,7 +206,7 @@ function parseSvgString(src, { size = 1200 } = {}) {
       }
     }
   }
-  const re = /<(\/?)(\w+)\b([^>]*?)(\/?)>/g;
+  const re = /<(\/?)(\w+)\b([^<>]*?)(\/?)>/g;
   let t, depthSvg = 0, inDefs = 0;
   while ((t = re.exec(src))) {
     const [, close, tag, rest, self] = t;

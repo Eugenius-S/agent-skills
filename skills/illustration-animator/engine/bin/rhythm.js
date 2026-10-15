@@ -11,9 +11,8 @@ if (!args[0] || args.indexOf('--style') < 0 || !/^[a-z0-9-]+$/.test(style || '')
   console.error('Usage: node engine/bin/rhythm.js <scene.json> --style <style>');
   process.exit(1);
 }
-// the repo keeps the rules in .claude/skills/animator-analyze/styles, the packed skill in references/styles
 const ROOT = path.join(__dirname, '..', '..');
-const profileFile = [path.join(ROOT, '.claude', 'skills', 'animator-analyze', 'styles'), path.join(ROOT, 'references', 'styles')]
+const profileFile = [path.join(ROOT, 'references', 'styles')]
   .map((d) => path.join(d, `${style}.json`)).find((f) => fs.existsSync(f));
 if (!profileFile) {
   console.log(JSON.stringify({ skipped: `no rhythm profile for style ${style}: rhythm is not scored` }, null, 2));

@@ -338,11 +338,13 @@ with headless Chrome or Edge, writes rasters to a temporary directory and delete
 makes no network request. If you start it with `uv run`, uv downloads Pillow from PyPI first.
 
 The `illustration-animator` skill runs a Node engine from its own folder. Its one-time setup
-installs four npm packages (`svgpath`, `lottie-web`, `puppeteer-core`, `@puppeteer/browsers`) from
-the npm registry into `~/.animator/`, downloads Chrome for Testing from Google only when no Chrome,
-Chromium or Edge is installed, and installs ffmpeg with Homebrew on macOS or winget on Windows when
-it is missing. After that it works offline: it reads the SVG files you point it at and writes
-scenes and animations next to them.
+prints a plan and installs nothing until you agree. It installs five npm packages pinned by a
+lockfile (`svgpath`, `lottie-web`, `paper`, `puppeteer-core`, `@puppeteer/browsers`) from the npm
+registry into `~/.animator/`, and downloads Chrome for Testing from Google (a pinned build, checked
+by SHA-256) only when no Chrome, Chromium or Edge is installed. It does not install ffmpeg: when
+ffmpeg is missing, setup shows the command for you to run. After that it works offline. It reads the
+SVG files you point it at, writes scenes, animations, rules and samples into that style folder, and
+renders frames in the system temporary folder.
 
 ## Animating illustrations: the `illustration-animator` skill
 
@@ -366,7 +368,7 @@ It does not need the MCP server or an Icons8 account. It needs Node.js; the firs
 - Network access to `https://mcp.icons8.com/mcp/`
 - An Icons8 account, signed in through the browser on first use
 - An Icons8 API key **only** where the client cannot do OAuth, or on CI
-- For `illustration-animator`: Node.js, and ffmpeg (installed by its setup on macOS and Windows)
+- For `illustration-animator`: Node.js 22.12 or newer, and ffmpeg (its setup shows how to install it)
 
 ## Support
 

@@ -18,7 +18,8 @@ A tenth skill: `illustration-animator` turns static SVG illustrations into loope
   illustration. A scene the user calls bad becomes a rule for the whole style. The rules and the
   reference scenes were trained on Icons8 animations and illustrations. It runs a Node engine from
   its own folder and does not use the MCP server. Its one-time setup lists what it would install
-  (pinned npm packages from a lockfile, Chrome, ffmpeg) and installs nothing until the user agrees;
+  (pinned npm packages from a lockfile, a pinned Chrome checked by SHA-256) and installs nothing
+  until the user agrees; ffmpeg it only names, the user installs it;
   the lessons, bans and samples it collects stay in the user's project, never in the plugin folder.
 
 ## [0.5.2] — 2026-10-05

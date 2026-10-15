@@ -1,8 +1,8 @@
 // Speed of every animated property in px per frame: jumps of speed at keys (lint) and smoothness of runs (rhythm).
-// Calibrated on refs/Plain (node engine/bin/motion-ref.js): a motion starts at 0.4–0.8 of its mean speed,
+// Calibrated on the reference animations of the Plain style: a motion starts at 0.4–0.8 of its mean speed,
 // speed changes over 2× between frames only where a symbol appears.
-// Checked against eval/approved (node engine/bin/regress.js): a snap of up to `snap` frames after a key — a pop from rest,
-// a rebound after an impact, a squash released, a wobble — may start at any speed: the owner approved such accents
+// Checked against approved scenes: a snap of up to `snap` frames after a key — a pop from rest,
+// a rebound after an impact, a squash released, a wobble — may start at any speed: such accents were approved
 // in Main, Organic, Black Chalk and Ballpoint Pen. A part arriving off the canvas (a car driving out) may arrive at speed.
 const fs = require('fs');
 const os = require('os');

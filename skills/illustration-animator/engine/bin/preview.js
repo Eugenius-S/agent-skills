@@ -1,4 +1,5 @@
 // usage: node engine/bin/preview.js <file.svg> [--els 3,4,5] [--labels] [--out file.png]
+const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { loadEnv } = require('../src/env');
@@ -12,7 +13,8 @@ if (!args[0]) {
 }
 const els = opt('--els') ? opt('--els').split(',').map((x) => (/^\d+$/.test(x) ? Number(x) : x)) : undefined;
 const name = path.basename(args[0], '.svg') + (els ? `-els-${els.join('-')}` : '');
-const out = path.resolve(opt('--out') || path.join(os.tmpdir(), `${name}.png`));
+// default: a fresh private folder in the temp dir, not a guessable shared name
+const out = path.resolve(opt('--out') || path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'animator-preview-')), `${name}.png`));
 
 preview(path.resolve(args[0]), loadEnv(), out, { els, labels: args.includes('--labels') })
   .then((f) => console.log(f))
