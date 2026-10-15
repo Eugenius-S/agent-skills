@@ -47,6 +47,6 @@ An emotional reaction of a character, a short gag with a return to the initial p
 
 ## Lessons
 
-- Don't make the hold between main poses shorter than 13 frames → starting hold 16 frames, the middle of the 13–20 range (three fast runs in a row had a median of 6.5 → 9 → 12.5, below the range; became 16). 2026-10-05, scene comic-man-hiding-from-ghosts-in-halloween-pumpkin, source: eval
+- Don't make the hold between main poses shorter than 13 frames → starting hold 16 frames, the middle of the 13–20 range (three fast runs in a row had a median of 6.5 → 9 → 12.5, below the range; became 16).
 
 ## User bans

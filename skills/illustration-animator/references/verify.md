@@ -93,10 +93,10 @@ When the user refines one illustration by hand (two or more remarks on the same 
 
 ```
 ## Round <N> (<time>)
-Owner: "<the remark, verbatim>"
+User: "<the remark, verbatim>"
 Did: <technique and parameters, 1–2 lines>
 Judge: <ok / redo: …> · preview watched: yes/no
-Owner's verdict: <in the next message: fixed / still … / new …>
+Verdict: <in the next message: fixed / still … / new …>
 ```
 
 When the user accepts the scene (or stops the refinement), compress the journal in the same file into: "Minimal path" (the fewest moves that lead to the result), "Wasted moves" (round — what — why), "Rules that would have given the result at once". Each such rule goes as a lesson into `<style folder>/rules.md`, source: journal.

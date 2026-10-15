@@ -10,10 +10,10 @@ Why: <reason>
 ```
 
 ## little-kpi-optimization-with-magnifying-glass-and-gears · judge: fail · user: ok
-Why: approved by a reviewer (2026-10-08); the judge failed it for the handle turning apart from the lens.
+Why: approved by a reviewer; the judge failed it for the handle turning apart from the lens.
 
 ## little-using-artificial-intelligence-in-computer-work · judge: fail · user: ok
-Why: a reviewer said "ok" (2026-10-08); the judge failed it for a thin line under the lifted robot arm.
+Why: a reviewer said "ok"; the judge failed it for a thin line under the lifted robot arm.
 
 ## rough-sketch-space-explorer-wearing-helmet-visor-and-backpack-under-crescent-moon · judge: fail · user: ok
-Why: approved by a reviewer (2026-10-08); the judge failed it for a still body and head with only the arm waving.
+Why: approved by a reviewer; the judge failed it for a still body and head with only the arm waving.
