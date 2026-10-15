@@ -56,7 +56,7 @@ setTimeout(() => {
 
   const issues = lint(inner, model);
   const f0 = await compareFrame0(model.svgFile, lottie, env, model.src, { frame: model.keyFrame, diffOut: path.join(outDir, `${name}.frame0-diff.png`) });
-  if (!f0.pass) issues.unshift({ check: 'frame0', frame: 0, outputFrame: model.keyFrame, detail: `key pose differs from SVG by ${f0.badPixelsPct}%` });
+  if (!f0.ok) issues.unshift({ check: 'frame0', frame: 0, outputFrame: model.keyFrame, detail: `key pose differs from SVG by ${f0.badPixelsPct}%` });
   else fs.rmSync(path.join(outDir, `${name}.frame0-diff.png`), { force: true });
   // a cut must not show at rest: the full-size compare along every cut line (the one above is 4× smaller)
   if (model.seams.length) {

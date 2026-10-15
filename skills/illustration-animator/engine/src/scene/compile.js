@@ -260,8 +260,8 @@ function centerline(elList, { from, to, via }) {
       const n = mids.length;
       const walk = (dir) => { const out = []; for (let k = a; ; k = (k + dir + n) % n) { if (mids[k]) out.push(mids[k]); if (k === b || (!c.closed && (k + dir < 0 || k + dir >= n))) break; } return out; };
       const ways = [walk(1), ...(c.closed ? [walk(-1)] : [])];
-      const pass = (wy) => (via ? Math.min(...wy.map((m) => Math.hypot(m.p[0] - via[0], m.p[1] - via[1]))) : wy.length);
-      const way = ways.sort((x, y) => pass(x) - pass(y))[0];
+      const dist = (wy) => (via ? Math.min(...wy.map((m) => Math.hypot(m.p[0] - via[0], m.p[1] - via[1]))) : wy.length);
+      const way = ways.sort((x, y) => dist(x) - dist(y))[0];
       if (!best || err < best.err) best = { err, way };
     }
   }

@@ -115,7 +115,7 @@ async function compareFrame0(svgFile, lottie, env, [W, H], { frame = 0, diffOut,
     }, svg, W, H, lottie.w, frame, down);
   });
   if (diffOut) fs.writeFileSync(diffOut, Buffer.from(res.diff.split(',')[1], 'base64'));
-  return { meanDiff: res.meanDiff, badPixelsPct: res.badPixelsPct, bad: res.bad, badPts: res.pts, leakPts: res.leak, pass: res.badPixelsPct < 0.5 };
+  return { meanDiff: res.meanDiff, badPixelsPct: res.badPixelsPct, bad: res.bad, badPts: res.pts, leakPts: res.leak, ok: res.badPixelsPct < 0.5 };
 }
 
 module.exports = { renderFrames, compareFrame0, withPage, load, killBrowsers };
